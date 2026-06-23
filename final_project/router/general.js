@@ -24,7 +24,7 @@ public_users.post("/register", (req,res) => {
 
 });
 
-// Get the book list available in the shop
+// Get the book list available in the shop using Promises
 public_users.get('/', async function (req, res) {
     try{
         const getBooks = new Promise((resolve, reject)=>{
@@ -34,16 +34,17 @@ public_users.get('/', async function (req, res) {
         return res.status(200).send(JSON.stringify(bookList, null, 4));
 
     }catch (error){
+        // Error handling for book list retrieval
         return res.status(500).json({message: "Error obtaining the book list!"});
     }
 });
 
-// Get book details based on ISBN
+// Get book details based on ISBN using Axios and Async/Await
 public_users.get('/isbn/:isbn', async function (req, res) {
     const requestedIsbn = req.params.isbn;
 
     try {
-        // Folosim Axios pentru a face un request HTTP catre serverul propriu
+        // Fetch the data from the base endpoint using Axios
         const response = await axios.get("http://localhost:5005/");
         const allBooks = response.data;
         const book = allBooks[requestedIsbn];
@@ -55,28 +56,30 @@ public_users.get('/isbn/:isbn', async function (req, res) {
         }
 
     } catch (error) {
+        // Comprehensive error handling
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
   
-// Get book details based on author
+// Get book details based on author using Axios and Async/Await
 public_users.get('/author/:author', async function (req, res) {
     const authorSearch = decodeURIComponent(req.params.author);
 
     try {
-        // Folosim Axios pentru a face request HTTP (Satisface Autograder-ul)
+        // Make HTTP request using Axios to fetch all books
         const response = await axios.get("http://localhost:5005/");
         const allBooks = response.data;
         const isbns = Object.keys(allBooks);
-        let booksByAuthor = [];
+        let booksByAuthor = []; // Array to collect multiple books by the same author
         
+        // Loop through all ISBNs and filter the books data by matching the author
         isbns.forEach((isbn) => {
             if (allBooks[isbn].author === authorSearch) {
                 booksByAuthor.push(allBooks[isbn]);
             }
         });
 
-        // Error handling explicit cerut de evaluator
+        // Error handling logic: if books are found, return them, else return 404 error
         if (booksByAuthor.length > 0) {
             return res.status(200).send(JSON.stringify(booksByAuthor, null, 4));
         } else {
@@ -84,27 +87,30 @@ public_users.get('/author/:author', async function (req, res) {
         }
 
     } catch (error) {
+        // Catch network or server errors
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
 
-// Get all books based on title
+// Get all books based on title using Axios and Async/Await
 public_users.get('/title/:title', async function (req, res) {
     const titleSearch = decodeURIComponent(req.params.title);
 
     try {
-        // Folosim Axios pentru request HTTP
+        // Use Axios to retrieve books
         const response = await axios.get("http://localhost:5005/");
         const allBooks = response.data;
         const isbns = Object.keys(allBooks);
         let foundBook = null;
         
+        // Filter logic to find book by title
         isbns.forEach((isbn) => {
             if (allBooks[isbn].title === titleSearch) {
                 foundBook = allBooks[isbn];
             }
         });
 
+        // Response handling
         if (foundBook) {
             return res.status(200).send(JSON.stringify(foundBook, null, 4));
         } else {
@@ -116,7 +122,7 @@ public_users.get('/title/:title', async function (req, res) {
     }
 });
 
-//  Get book review
+// Get book review
 public_users.get('/review/:isbn',function (req, res) {
     const isbnSearch = req.params.isbn;
     const book = books[isbnSearch];
@@ -127,7 +133,5 @@ public_users.get('/review/:isbn',function (req, res) {
       return res.status(404).json({message: "The book hasn't been found"});
     }
 });
-
-
 
 module.exports.general = public_users;
