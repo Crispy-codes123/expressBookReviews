@@ -34,7 +34,7 @@ regd_users.post("/login", (req,res) => {
             accessToken,
             username
         };
-        return res.status(200).send("User succesfully logged in");
+        return res.status(200).send("Customer successfully logged in");
     } else {
         return res.status(401).json({ message: "Login failed"});
     }
@@ -55,7 +55,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
         books[isbn].reviews[username] = review;
         
         return res.status(200).json({ 
-            message: `Review for the book: ${isbn} has been submited/modified by ${username}.` 
+            message: `Review for the book: ${isbn} has been successfully submited/modified by ${username}.` 
         });
         
     } else {
@@ -76,13 +76,12 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
                 delete book.reviews[username];
             
             return res.status(200).json({ 
-                message: `Review by ${username} for the book ${isbn} has been deleted.` 
+                message: `Review by ${username} for the book ${isbn} has been successfully deleted.` 
             });
         } else {
             return res.status(404).json({ message: "User has no reviews" });
         }
     } else {
-        // Dacă ISBN-ul nu există
         return res.status(404).json({ message: "The book hasn't been found!" });
     }
 });
