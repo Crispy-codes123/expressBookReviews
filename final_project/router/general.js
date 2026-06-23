@@ -63,31 +63,40 @@ public_users.get('/isbn/:isbn', async function (req, res) {
   
 // Get book details based on author using Axios and Async/Await
 public_users.get('/author/:author', async function (req, res) {
+    // Decode the author name from the URL parameters
     const authorSearch = decodeURIComponent(req.params.author);
 
     try {
-        // Make HTTP request using Axios to fetch all books
+        // Use Axios to make an HTTP GET request to our own base URL to fetch all books
         const response = await axios.get("http://localhost:5005/");
+        // Extract the data object containing all books from the Axios response
         const allBooks = response.data;
+        // Retrieve all the keys (ISBNs) from the allBooks object
         const isbns = Object.keys(allBooks);
-        let booksByAuthor = []; // Array to collect multiple books by the same author
+        // Initialize an empty array to collect all books written by the specific author
+        let booksByAuthor = []; 
         
-        // Loop through all ISBNs and filter the books data by matching the author
+        // Loop through the array of ISBNs to iterate over each book
         isbns.forEach((isbn) => {
+            // Check if the author of the current book matches the requested author
+            // This is the logic behind filtering books by author
             if (allBooks[isbn].author === authorSearch) {
+                // If there is a match, push the book details into our filtering array
                 booksByAuthor.push(allBooks[isbn]);
             }
         });
 
-        // Error handling logic: if books are found, return them, else return 404 error
+        // Evaluate if our filtered array has any matching books
         if (booksByAuthor.length > 0) {
+            // Return the filtered list of books with a 200 OK HTTP status
             return res.status(200).send(JSON.stringify(booksByAuthor, null, 4));
         } else {
+            // If no books correspond to the author, return a 404 Not Found error
             return res.status(404).json({ message: "Author not found" });
         }
 
     } catch (error) {
-        // Catch network or server errors
+        // Catch any potential network or server issues during the Axios request
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
