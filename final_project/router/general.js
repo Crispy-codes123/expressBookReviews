@@ -5,7 +5,6 @@ let users = require("./auth_users.js").users;
 const axios = require('axios');
 const public_users = express.Router();
 
-
 public_users.post("/register", (req,res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -24,109 +23,126 @@ public_users.post("/register", (req,res) => {
 
 });
 
-// Get the book list available in the shop using Promises
+// Task 10: Get the book list available in the shop using Promises
 public_users.get('/', async function (req, res) {
-    try{
-        const getBooks = new Promise((resolve, reject)=>{
+    try {
+        // Create a new Promise to handle the asynchronous operation
+        const getBooks = new Promise((resolve, reject) => {
+            // Resolve the promise with the books object
             resolve(books);
         });
+        // Wait for the promise to resolve
         const bookList = await getBooks;
+        // Return the book list with a 200 OK HTTP status
         return res.status(200).send(JSON.stringify(bookList, null, 4));
 
-    }catch (error){
-        // Error handling for book list retrieval
+    } catch (error) {
+        // Handle any errors that might occur during retrieval
         return res.status(500).json({message: "Error obtaining the book list!"});
     }
 });
 
-// Get book details based on ISBN using Axios and Async/Await
+// Task 11: Get book details based on ISBN using Axios and Async/Await
 public_users.get('/isbn/:isbn', async function (req, res) {
+    // Retrieve the ISBN from the request parameters
     const requestedIsbn = req.params.isbn;
 
     try {
-        // Fetch the data from the base endpoint using Axios
+        // Use Axios to make an HTTP GET request to our own base URL
         const response = await axios.get("http://localhost:5005/");
+        // Extract the data object containing all books
         const allBooks = response.data;
+        // Find the specific book by its ISBN
         const book = allBooks[requestedIsbn];
         
+        // If the book exists, send it in the response
         if (book) {
             return res.status(200).send(JSON.stringify(book, null, 4));
         } else {
+            // Return a 404 Not Found error if the ISBN doesn't exist
             return res.status(404).json({ message: "Book not found" });
         }
 
     } catch (error) {
-        // Comprehensive error handling
+        // Catch any potential network or server issues
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
   
-// Get book details based on author using Axios and Async/Await
+// Task 12: Get book details based on author using Axios and Async/Await
 public_users.get('/author/:author', async function (req, res) {
     // Decode the author name from the URL parameters
     const authorSearch = decodeURIComponent(req.params.author);
 
     try {
-        // Use Axios to make an HTTP GET request to our own base URL to fetch all books
+        // Use Axios to make an HTTP GET request to fetch all books
         const response = await axios.get("http://localhost:5005/");
-        // Extract the data object containing all books from the Axios response
+        // Extract the data object
         const allBooks = response.data;
-        // Retrieve all the keys (ISBNs) from the allBooks object
+        // Retrieve all the keys (ISBNs)
         const isbns = Object.keys(allBooks);
-        // Initialize an empty array to collect all books written by the specific author
+        // Initialize an empty array to collect filtered books
         let booksByAuthor = []; 
         
-        // Loop through the array of ISBNs to iterate over each book
+        // Loop through the array of ISBNs
         isbns.forEach((isbn) => {
-            // Check if the author of the current book matches the requested author
-            // This is the logic behind filtering books by author
+            // Check if the author matches the requested author
             if (allBooks[isbn].author === authorSearch) {
-                // If there is a match, push the book details into our filtering array
+                // Push the book details into our array
                 booksByAuthor.push(allBooks[isbn]);
             }
         });
 
         // Evaluate if our filtered array has any matching books
         if (booksByAuthor.length > 0) {
-            // Return the filtered list of books with a 200 OK HTTP status
+            // Return the filtered list with a 200 OK status
             return res.status(200).send(JSON.stringify(booksByAuthor, null, 4));
         } else {
-            // If no books correspond to the author, return a 404 Not Found error
+            // Return a 404 error if not found
             return res.status(404).json({ message: "Author not found" });
         }
 
     } catch (error) {
-        // Catch any potential network or server issues during the Axios request
+        // Catch network or server errors
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
 
-// Get all books based on title using Axios and Async/Await
+// Task 13: Get all books based on title using Axios and Async/Await
 public_users.get('/title/:title', async function (req, res) {
+    // Decode the title parameter from the URL
     const titleSearch = decodeURIComponent(req.params.title);
 
     try {
-        // Use Axios to retrieve books
+        // Use Axios to make an HTTP request
         const response = await axios.get("http://localhost:5005/");
+        // Extract the data object
         const allBooks = response.data;
+        // Retrieve all the keys (ISBNs)
         const isbns = Object.keys(allBooks);
+        // Initialize a variable for the found book
         let foundBook = null;
         
         // Filter logic to find book by title
         isbns.forEach((isbn) => {
+            // Check if the title matches
             if (allBooks[isbn].title === titleSearch) {
+                // Assign the found book
                 foundBook = allBooks[isbn];
             }
         });
 
         // Response handling
         if (foundBook) {
+            // Return the book details
             return res.status(200).send(JSON.stringify(foundBook, null, 4));
         } else {
+            // Return a 404 error if not found
             return res.status(404).json({ message: "Title not found" });
         }
 
     } catch (error) {
+        // Catch any errors during the process
         return res.status(500).json({ message: "Error fetching book details" });
     }
 });
